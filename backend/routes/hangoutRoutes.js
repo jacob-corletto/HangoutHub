@@ -103,4 +103,106 @@ router.post("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Add a suggestion
+router.post("/:id/suggestions", authMiddleware, async (req, res) => {
+  try {
+    const hangout = await Hangout.findById(req.params.id);
+    if (!hangout) {
+      return res.status(404).json({ message: "Hangout not found" });
+    }
+    if (!hangout.openForSuggestions) {
+      return res
+        .status(400)
+        .json({ message: "Hangout is not open for suggestions" });
+    }
+    const { content, time, place } = req.body;
+    const newSuggestion = {
+      content,
+      time,
+      place,
+      createdBy: req.user.userId,
+    };
+    hangout.suggestions.push(newSuggestion);
+    await hangout.save();
+    res.status(201).json(hangout);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Upvote a suggestion
+router.post(
+  "/:id/suggestions/:suggestionId/upvote",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const hangout = await Hangout.findById(req.params.id);
+      if (!hangout) {
+        return res.status(404).json({ message: "Hangout not found" });
+      }
+      const suggestion = hangout.suggestions.id(req.params.suggestionId);
+      if (!suggestion) {
+        return res.status(404).json({ message: "Suggestion not found" });
+      }
+      suggestion.votes += 1;
+      await hangout.save();
+      res.status(200).json(hangout);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+// Downvote a suggestion
+router.post(
+  "/:id/suggestions/:suggestionId/downvote",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const hangout = await Hangout.findById(req.params.id);
+      if (!hangout) {
+        return res.status(404).json({ message: "Hangout not found" });
+      }
+      const suggestion = hangout.suggestions.id(req.params.suggestionId);
+      if (!suggestion) {
+        return res.status(404).json({ message: "Suggestion not found" });
+      }
+      suggestion.votes -= 1;
+      await hangout.save();
+      res.status(200).json(hangout);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+// Select top-rated suggestion
+router.post("/:id/suggestions/select-top", authMiddleware, async (req, res) => {
+  try {
+    const hangout = await Hangout.findById(req.params.id);
+    if (!hangout) {
+      return res.status(404).json({ message: "Hangout not found" });
+    }
+    if (hangout.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({ message: "User not authorized" });
+    }
+    const topSuggestion = hangout.suggestions.sort(
+      (a, b) => b.votes - a.votes
+    )[0];
+    if (!topSuggestion) {
+      return res.status(404).json({ message: "No suggestions found" });
+    }
+    hangout.selectedSuggestion = {
+      time: topSuggestion.time,
+      place: topSuggestion.place,
+    };
+    hangout.date = topSuggestion.time;
+    hangout.location = topSuggestion.place;
+    await hangout.save();
+    res.status(200).json(hangout);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
