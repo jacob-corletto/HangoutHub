@@ -10,13 +10,13 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (token) {
       api
-        .get("/auth/me")
+        .get("/users/profile")
         .then((response) => {
           setUser(response.data);
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
-          localStorage.removeItem("token");
+          // localStorage.removeItem("token");
         });
     }
   }, []);

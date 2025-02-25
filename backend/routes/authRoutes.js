@@ -2,7 +2,22 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const authMiddleware = require("../Middleware/authMiddleware");
 const router = express.Router();
+
+// auth me
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._Id).select("-password");
+    if (!user) {
+      console.log("User not found");
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // Sign Up
 router.post("/signup", async (req, res) => {
@@ -26,7 +41,13 @@ router.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: "User created successfully" });
+
+    // Create JWT token
+    const token = jwt.sign({ _id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "2d",
+    });
+
+    res.status(201).json({ token, user: newUser });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -50,11 +71,11 @@ router.post("/login", async (req, res) => {
     }
 
     // Create JWT token
-    const token = jwt.sign({ userId: user._id }, "your_jwt_secret", {
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "2d",
     });
 
-    res.status(200).json({ token });
+    res.status(200).json({ token, user });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }

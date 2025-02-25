@@ -1,13 +1,15 @@
 const express = require("express");
 const User = require("../models/User");
 const router = express.Router();
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../Middleware/authMiddleware");
 
 // Get user profile
-router.get("/profile/", authMiddleware, async (req, res) => {
+router.get("/profile", authMiddleware, async (req, res) => {
   try {
+    console.log("User ID from token:", req.user.userId); // Debugging statement
     const user = await User.findById(req.user.userId).select("-password");
     if (!user) {
+      console.log("User not found in profile route");
       return res.status(404).json({ message: "User not found" });
     }
     res.json(user);
@@ -21,7 +23,7 @@ router.put("/profile", authMiddleware, async (req, res) => {
   try {
     const { username, email, profilePicture } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
-      req.user.userId,
+      req.user._id,
       { username, email, profilePicture },
       { new: true, runValidators: true }
     ).select("-password");
@@ -37,7 +39,7 @@ router.put("/profile", authMiddleware, async (req, res) => {
 // Get User's Hangouts
 router.get("/hangouts", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId)
+    const user = await User.findById(req.user._id)
       .populate(
         "hangoutHistory createdHangouts interestedHangouts attendingHangouts"
       )
@@ -59,7 +61,7 @@ router.get("/hangouts", authMiddleware, async (req, res) => {
 // Get User's Notifications
 router.get("/notifications", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select("notifications");
+    const user = await User.findById(req.user._id).select("notifications");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -68,4 +70,5 @@ router.get("/notifications", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 module.exports = router;
