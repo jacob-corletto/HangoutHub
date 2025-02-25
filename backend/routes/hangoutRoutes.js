@@ -205,4 +205,22 @@ router.post("/:id/suggestions/select-top", authMiddleware, async (req, res) => {
   }
 });
 
+// Make Hangout Open for Suggestions
+router.post("/:id/open-for-suggestions", authMiddleware, async (req, res) => {
+  try {
+    const hangout = await Hangout.findById(req.params.id);
+    if (!hangout) {
+      return res.status(404).json({ message: "Hangout not found" });
+    }
+    if (hangout.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({ message: "User not authorized" });
+    }
+    hangout.openForSuggestions = true;
+    await hangout.save();
+    res.status(200).json(hangout);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
