@@ -96,3 +96,6 @@ dist
 
 # Windows files
 Thumbs.db
+
+# json dependency files
+package-lock.json
