@@ -7,20 +7,23 @@ const router = express.Router();
 // Create a new hangout
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { title, description, date, location } = req.body;
+    const { title, description, date, location, private, recurring } = req.body;
+    console.log("Creating hangout with data:", req.body); // Debugging statement
+    console.log("User ID from token:", req.user._Id); // Debugging statement
     const newHangout = new Hangout({
       title,
+      description,
       date,
       location,
-      private,
-      description,
-      recurring,
-      createdBy: req.user.userId,
-      organizer: req.user.userId,
+      private: private || false, // Ensure private has a default value
+      recurring: recurring || { isRecurring: false }, // Ensure recurring has a default value
+      createdBy: req.user._id,
+      organizer: req.user._id,
     });
     await newHangout.save();
     res.status(201).json(newHangout);
   } catch (error) {
+    console.error("Error creating hangout:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

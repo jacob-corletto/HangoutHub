@@ -1,10 +1,12 @@
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import api from "../services/api";
 
 const HomePage = () => {
   const { user, loading, logout } = useContext(AuthContext);
   const [hangouts, setHangouts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHangouts = async () => {
@@ -27,11 +29,16 @@ const HomePage = () => {
     return <div>Please log in to see your hangouts.</div>;
   }
 
+  const handleCreateHangout = () => {
+    navigate("/create-hangout");
+  };
+
   return (
     <div>
       <h1>Welcome, {user.username}!</h1>
       <button onClick={logout}>Logout</button>
       <h2>Your Hangouts</h2>
+      <button onClick={handleCreateHangout}>Create Hangout</button>
       <ul>
         {hangouts.map((hangout) => (
           <li key={hangout._id}>

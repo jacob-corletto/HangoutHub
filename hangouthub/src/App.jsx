@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import HangoutPage from "./pages/HangoutPage";
 import SignUpPage from "./pages/SignUpPage";
 import PrivateRoute from "./components/PrivateRoute";
+import CreateHangoutPage from "./pages/CreateHangoutPage";
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
           <Route
             path="/hangouts/:id"
             element={<PrivateRoute element={<HangoutPage />} />}
+          />
+          <Route
+            path="/create-hangout"
+            element={<PrivateRoute element={<CreateHangoutPage />} />}
           />
           <Route path="/" element={<PrivateRoute element={<HomePage />} />} />
         </Routes>
