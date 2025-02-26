@@ -3,7 +3,7 @@ import AuthContext from "../context/AuthContext";
 import api from "../services/api";
 
 const HomePage = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, loading, logout } = useContext(AuthContext);
   const [hangouts, setHangouts] = useState([]);
 
   useEffect(() => {
@@ -18,6 +18,14 @@ const HomePage = () => {
 
     fetchHangouts();
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <div>Please log in to see your hangouts.</div>;
+  }
 
   return (
     <div>

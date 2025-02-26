@@ -15,9 +15,9 @@ function App() {
           <Route path="/signup" element={<SignUpPage />} />
           <Route
             path="/hangouts/:id"
-            element={<PrivateRoute component={HangoutPage} />}
+            element={<PrivateRoute element={<HangoutPage />} />}
           />
-          <Route path="/" element={<PrivateRoute component={HomePage} />} />
+          <Route path="/" element={<PrivateRoute element={<HomePage />} />} />
         </Routes>
       </Router>
     </AuthProvider>

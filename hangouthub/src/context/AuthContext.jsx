@@ -5,24 +5,30 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchUserData = async () => {
     const token = localStorage.getItem("token");
+    console.log("Token from localStorage in authcontext:", token); // Debugging line
     if (token) {
-      api
-        .get("/users/profile", {
+      try {
+        const response = await api.get("/users/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        })
-        .then((response) => {
-          setUser(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-          localStorage.removeItem("token");
         });
+        console.log("User data from API in authcontext:", response.data); // Debugging line
+        setUser(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        localStorage.removeItem("token");
+      }
     }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchUserData();
   }, []);
 
   const login = async (email, password) => {
@@ -57,7 +63,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
