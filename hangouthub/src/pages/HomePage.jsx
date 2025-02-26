@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import api from "../services/api";
 
@@ -42,7 +42,9 @@ const HomePage = () => {
       <ul>
         {hangouts.map((hangout) => (
           <li key={hangout._id}>
-            <h3>{hangout.title}</h3>
+            <h3>
+              <Link to={`/hangouts/${hangout._id}`}>{hangout.title}</Link>
+            </h3>
             <p>{hangout.description}</p>
             <p>Organizer: {hangout.organizer.username}</p>
           </li>
