@@ -6,8 +6,8 @@ const authMiddleware = require("../Middleware/authMiddleware");
 // Get user profile
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
-    console.log("User ID from token:", req.user.userId); // Debugging statement
-    const user = await User.findById(req.user.userId).select("-password");
+    console.log("User ID from token:", req.user._id); // Debugging statement
+    const user = await User.findById(req.user._id).select("-password");
     if (!user) {
       console.log("User not found in profile route");
       return res.status(404).json({ message: "User not found" });

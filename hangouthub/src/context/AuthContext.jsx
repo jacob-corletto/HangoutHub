@@ -10,13 +10,17 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (token) {
       api
-        .get("/users/profile")
+        .get("/users/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         .then((response) => {
           setUser(response.data);
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
-          // localStorage.removeItem("token");
+          localStorage.removeItem("token");
         });
     }
   }, []);
@@ -33,13 +37,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signup = async (username, email, password) => {
-    const response = await api.post("/auth/signup", {
-      username,
-      email,
-      password,
-    });
-    localStorage.setItem("token", response.data.token);
-    setUser(response.data.user);
+    try {
+      const response = await api.post("/auth/signup", {
+        username,
+        email,
+        password,
+      });
+      localStorage.setItem("token", response.data.token);
+      setUser(response.data.user);
+    } catch (error) {
+      console.error("Signup error:", error);
+      throw new Error("Signup failed");
+    }
   };
 
   const logout = () => {
